@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Password Strength Analyzer</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div class="app">
+    <header class="app-header">
+      <div class="logo">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="4" y="12" width="20" height="14" rx="3" fill="currentColor" opacity="0.15"/>
+          <rect x="4" y="12" width="20" height="14" rx="3" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M9 12V8a5 5 0 0 1 10 0v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <circle cx="14" cy="19" r="2" fill="currentColor"/>
+        </svg>
+        <span>PassGuard</span>
+      </div>
+      <p class="app-tagline">Analyze and strengthen your passwords</p>
+    </header>
+
+    <main class="app-main">
+      <!-- Input Section -->
+      <section class="card input-card" aria-label="Password input">
+        <label class="input-label" for="pwInput">Your password</label>
+        <div class="input-row">
+          <input
+            type="password"
+            id="pwInput"
+            class="pw-input"
+            placeholder="Enter a password to analyze…"
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <button class="icon-btn" id="toggleBtn" onclick="toggleVisibility()" aria-label="Show password">
+            <svg id="eyeIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          </button>
+          <button class="icon-btn" id="clearBtn" onclick="clearPassword()" aria-label="Clear password" style="display:none">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Strength meter -->
+        <div class="meter-wrap" aria-live="polite">
+          <div class="meter-track">
+            <div class="meter-fill" id="meterFill"></div>
+          </div>
+          <div class="meter-meta">
+            <span class="strength-label" id="strengthLabel">Enter a password</span>
+            <span class="strength-score" id="strengthScore"></span>
+          </div>
+        </div>
+
+        <!-- Reuse warning -->
+        <div class="reuse-warn hidden" id="reuseWarn" role="alert">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          This password was used recently — choose a different one.
+        </div>
+      </section>
+
+      <!-- Stats Row -->
+      <div class="stats-row" id="statsRow" aria-label="Password statistics">
+        <div class="stat-card">
+          <span class="stat-val" id="statLen">—</span>
+          <span class="stat-lbl">Length</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-val" id="statEnt">—</span>
+          <span class="stat-lbl">Entropy</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-val" id="statPool">—</span>
+          <span class="stat-lbl">Char pool</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-val" id="statCrack">—</span>
+          <span class="stat-lbl">Crack time</span>
+        </div>
+      </div>
+
+      <!-- Security Checks -->
+      <section class="card" aria-label="Security checks">
+        <h2 class="card-title">Security checks</h2>
+        <div class="checks-grid" id="checksGrid">
+          <div class="check-item neutral" id="chk-len">
+            <span class="check-icon" aria-hidden="true"></span>
+            <span>12+ characters</span>
+          </div>
+          <div class="check-item neutral" id="chk-upper">
+            <span class="check-icon" aria-hidden="true"></span>
+            <span>Uppercase letter</span>
+          </div>
+          <div class="check-item neutral" id="chk-lower">
+            <span class="check-icon" aria-hidden="true"></span>
+            <span>Lowercase letter</span>
+          </div>
+          <div class="check-item neutral" id="chk-digit">
+            <span class="check-icon" aria-hidden="true"></span>
+            <span>Number</span>
+          </div>
+          <div class="check-item neutral" id="chk-sym">
+            <span class="check-icon" aria-hidden="true"></span>
+            <span>Symbol (!@#…)</span>
+          </div>
+          <div class="check-item neutral" id="chk-nodict">
+            <span class="check-icon" aria-hidden="true"></span>
+            <span>No common words</span>
+          </div>
+          <div class="check-item neutral" id="chk-norep">
+            <span class="check-icon" aria-hidden="true"></span>
+            <span>No repeated chars</span>
+          </div>
+          <div class="check-item neutral" id="chk-noseq">
+            <span class="check-icon" aria-hidden="true"></span>
+            <span>No sequences (abc, 123)</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Suggestions -->
+      <section class="card" aria-label="Suggested stronger passwords">
+        <div class="card-header-row">
+          <h2 class="card-title">Stronger alternatives</h2>
+          <button class="text-btn" id="refreshBtn" onclick="refreshSuggestions()" aria-label="Refresh suggestions">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            Refresh
+          </button>
+        </div>
+        <div class="suggestions-list" id="suggestionsList">
+          <p class="empty-msg">Suggestions appear once you start typing…</p>
+        </div>
+      </section>
+
+      <!-- History -->
+      <section class="card" aria-label="Password history">
+        <div class="card-header-row">
+          <h2 class="card-title">Session history</h2>
+          <button class="text-btn" onclick="clearHistory()">Clear</button>
+        </div>
+        <div class="history-list" id="historyList">
+          <p class="empty-msg">Analyzed passwords will appear here.</p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <p>Passwords never leave your browser. No data is sent to any server.</p>
+    </footer>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="js/analyzer.js"></script>
+  <script src="js/ui.js"></script>
+</body>
+</html>
